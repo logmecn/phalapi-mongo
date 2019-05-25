@@ -1,0 +1,29 @@
+{
+  "name": "phalapi/mongo",
+  "description": "PhalApi 2.x 扩展类库 - Redis 丰富基础redisCache类功能,更贴切复杂场景下的redis使用。",
+  "keywords": [
+    "phalapi",
+    "mongodb",
+    "phalapi-mongo"
+  ],
+  "license": "GPL-3.0-or-later",
+  "minimum-stability": "dev",
+  "homepage": "https://www.phalapi.net/",
+  "type": "library",
+  "authors": [
+    {
+      "name": "logmecn",
+      "email": "logme@qq.com",
+      "homepage": "logme.cn",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": ">=7.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "PhalApi\\Mongo\\": "src/"
+    }
+  }
+}
