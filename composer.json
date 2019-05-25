@@ -19,7 +19,10 @@
     }
   ],
   "require": {
-    "php": ">=7.1"
+    "php": ">=7.1",
+    "ext-mongodb": "*",
+    "ext-json": "*",
+    "mongodb/mongodb": "*"
   },
   "autoload": {
     "psr-4": {

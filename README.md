@@ -38,6 +38,7 @@
     ```
 
 3. 在 composer.json 中的 require 中加入一行：
+    （说明：暂时未支持，后续争取支持）
     ```
     "phalapi/mongo": "dev-master"
     ```
@@ -95,3 +96,4 @@
       }
       ```
 2. 读取：
+    （后续放在Demo中，不放在帮助里）
