@@ -20,6 +20,7 @@
   ],
   "require": {
     "php": ">=7.1",
+    "phalapi/phalapi": "2.*",
     "ext-mongodb": "*",
     "ext-json": "*",
     "mongodb/mongodb": "*"

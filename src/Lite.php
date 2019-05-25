@@ -14,8 +14,8 @@ namespace PhalApi\Mongo;
 //    'username' => '',
 //    'password' => '',
 //    'read_preference' => '',
-//    'connect_timeout_ms' => 'connect_timeout_ms',
-//    'socket_timeout_ms' => 'socket_timeout_ms',
+//    'connect_timeout_ms' => '',
+//    'socket_timeout_ms' => '',
 //
 //    'persist' => 'x',
 //),
@@ -25,14 +25,24 @@ use MongoDB;
 use MongoDB\Driver\Manager;
 
 /**
- * @property  confArr
+ *
  */
 class Lite {
+    private $confArr = array();
+
+    /**
+     * Lite constructor.
+     * @param $conf 连接 MongoDB 的配置加载
+     */
     public function __construct($conf)
     {
         $this->confArr = $conf;
     }
 
+    /**
+     * @desc 连接到 MongoDB
+     * @return bool|Manager
+     */
     private function connect() {
         try{
             $connStr = "mongodb://" . $this->confArr['host'] . ":" . $this->confArr['port'] . "/" . $this->confArr['db_name'];
@@ -51,7 +61,18 @@ class Lite {
             return false;
         }
     }
-    //2.查询find:
+
+    /**
+     * @desc 查询find:
+     * @param array $query
+     * @param array $fields
+     * @param $collection
+     * @param array $sort
+     * @param int $limit
+     * @param int $skip
+     * @return array|bool
+     * @throws MongoDB\Driver\Exception\Exception
+     */
     public function find($query = array(), $fields = array(), $collection, $sort = array(), $limit = 0, $skip = 0) {
         $conn = $this->connect();
         if (empty($conn)) {
@@ -82,7 +103,13 @@ class Lite {
         }
         return false;
     }
-    //3.插入操作insert:
+
+    /**
+     * @desc 插入操作insert:
+     * @param  array $addArr  要增加的数据
+     * @param  string $collection
+     * @return bool|string
+     */
     public function insert($addArr, $collection) {
         if (empty($addArr) || !is_array($addArr)) {
             return false;
@@ -104,7 +131,14 @@ class Lite {
         }
         return false;
     }
-    //4.删除delete：
+
+    /**
+     * @desc 删除delete：
+     * @param array $whereArr
+     * @param array $options
+     * @param string $collection
+     * @return bool
+     */
     public function delete($whereArr, $options = array(), $collection) {
         if (empty($whereArr)) {
             return false;
@@ -129,7 +163,14 @@ class Lite {
         }
         return false;
     }
-    //5.执行command操作:
+
+    /**
+     * @desc 执行command操作:
+     * @param array $params
+     * @param string $dbName
+     * @return bool|MongoDB\Driver\Cursor
+     * @throws MongoDB\Driver\Exception\Exception
+     */
     private function command($params, $dbName) {
         $conn = $this->connect();
         if (empty($conn)) {
@@ -144,7 +185,14 @@ class Lite {
         }
         return false;
     }
-    // 6.统计count:
+
+    /**
+     * @desc // 6.统计count:
+     * @param array $query
+     * @param string $collection
+     * @return bool
+     * @throws MongoDB\Driver\Exception\Exception
+     */
     public function count($query, $collection) {
         try {
             $cmd = array(
@@ -159,7 +207,15 @@ class Lite {
         }
         return false;
     }
-    // 7.聚合distinct:
+
+    /**
+     * @desc  7.聚合distinct
+     * @param $key
+     * @param $where
+     * @param $collection
+     * @return bool
+     * @throws MongoDB\Driver\Exception\Exception
+     */
     public function distinct($key, $where, $collection) {
         try {
             $cmd = array(
@@ -175,7 +231,15 @@ class Lite {
         }
         return false;
     }
-    // 8.aggregate操作：
+
+    /**
+     * @desc  8.aggregate操作：
+     * @param $where
+     * @param $group
+     * @param $collection
+     * @return bool
+     * @throws MongoDB\Driver\Exception\Exception
+     */
     public function aggregate($where, $group, $collection) {
         try {
             $cmd = array(
