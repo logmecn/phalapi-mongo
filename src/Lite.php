@@ -32,7 +32,7 @@ class Lite {
 
     /**
      * Lite constructor.
-     * @param $conf 连接 MongoDB 的配置加载
+     * @param array $conf 连接 MongoDB 的配置加载
      */
     public function __construct($conf)
     {
@@ -190,16 +190,17 @@ class Lite {
      * @desc // 6.统计count:
      * @param array $query
      * @param string $collection
+     * @param $dbName
      * @return bool
      * @throws MongoDB\Driver\Exception\Exception
      */
-    public function count($query, $collection) {
+    public function count($query, $collection, $dbName) {
         try {
             $cmd = array(
                 'count' => $collection,
                 'query' => $query,
             );
-            $res = $this->command($cmd);
+            $res = $this->command($cmd, $dbName);
             $result = $res->toArray();
             return $result[0]->n;
         } catch (Exception $e) {
@@ -237,10 +238,11 @@ class Lite {
      * @param $where
      * @param $group
      * @param $collection
+     * @param $dbName
      * @return bool
      * @throws MongoDB\Driver\Exception\Exception
      */
-    public function aggregate($where, $group, $collection) {
+    public function aggregate($where, $group, $collection, $dbName) {
         try {
             $cmd = array(
                 'aggregate' => $collection,
@@ -254,7 +256,7 @@ class Lite {
                 ),
                 'explain' => false,
             );
-            $res = $this->command($cmd);
+            $res = $this->command($cmd, $dbName);
             if (!$res) {
                 return false;
             }
