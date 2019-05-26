@@ -1,6 +1,6 @@
 {
   "name": "logmecn/mongo",
-  "description": "PhalApi 2.x 扩展类库 - Redis 丰富基础redisCache类功能,更贴切复杂场景下的redis使用。",
+  "description": "PhalApi 2.x 扩展类库 - 使用 MongoDB 的扩展",
   "keywords": [
     "phalapi",
     "mongodb",
@@ -14,7 +14,7 @@
     {
       "name": "logmecn",
       "email": "logme@qq.com",
-      "homepage": "www.logme.cn",
+      "homepage": "https://github.com/logmecn",
       "role": "Developer"
     }
   ],
