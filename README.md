@@ -38,9 +38,9 @@
     ```
 
 3. 在 composer.json 中的 require 中加入一行：
-    （说明：暂时未支持，后续争取支持）
+    （说明：暂时未支持，后续争取支持使用 phalapi/mongo）
     ```
-    "phalapi/mongo": "dev-master"
+    "logmecn/mongo": "dev-master"
     ```
 4. 执行命令：
     ```shell
