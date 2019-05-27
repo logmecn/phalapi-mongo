@@ -21,12 +21,11 @@ class Site extends Api {
             'queryUser' => array(
                 'userId' => array('name' => 'userId', 'desc'=> '用户的userid'),
             ),
-            'createUser' => array(
-            ),
-            'syncDept' => array(),
-            'syncUser' => array(),
             'syncUserByDept' => array(
                 'dept' => array('name' => 'dept', 'type' => 'int', 'default' => 1, 'min' => 1, 'desc' => '同步该部门id下的所有人员详情'),
+            ),
+            'delUser' => array(
+                'userId' => array('name' => 'userId', 'desc'=> '用户的userid'),
             ),
         );
     }
@@ -99,17 +98,27 @@ class Site extends Api {
         }
     }
 
-//    public function mongodb1() {
-//        $manager = new MongoDB\Driver\Manager("mongodb://localhost:27017", array("persist"=>"x"));
-//        $bulk = new MongoDB\Driver\BulkWrite;
-//        $document = ['id' => new MongoDB\BSON\ObjectId, 'name'=> '菜鸡教程'];
-//        $_id = $bulk->insert($document);
-//        var_dump($_id);
-//
-//        $writeConcern = new MongoDB\Driver\WriteConcern(MongoDB\Driver\WriteConcern::MAJORITY, 1000);
-//        $result = $manager->executeBulkWrite('test.runobb', $bulk, $writeConcern);
-//        return $result;
-//    }
+    /**
+     * @desc 查询单个用户信息
+     * @return mixed
+     */
+    public function queryUser(){
+        // http://127.0.0.1/index.php?s=Site.queryUser&userid=bob
+        $query = array('userid'=>$this->userid);
+        $res = $this->mong->find($this->ns, $query, $field=array());
+        return $res;
+    }
+
+    /**
+     * @desc 删除用户
+     * @return mixed
+     */
+    public function delUser(){
+        $query = array('userid' => $this->userid);
+        $res = $this->mong->delete($this->ns, $query);
+        return $res;
+    }
+
 
 
     /**

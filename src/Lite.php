@@ -1,24 +1,11 @@
 <?php
 /**
  * Created by PS_YWQ
- * User: Yuan Wen Qiang
+ * User: Logmecn
  * Date: 2019/5/24-15:32
  */
 
 namespace PhalApi\Mongo;
-
-//'mongo' => array(
-//    'host' => 'localhost',
-//    'port' => '27017',
-//    'db_name' => '',
-//    'username' => '',
-//    'password' => '',
-//    'read_preference' => '',
-//    'connect_timeout_ms' => '',
-//    'socket_timeout_ms' => '',
-//
-//    'persist' => 'x',
-//),
 
 use Exception;
 use MongoDB;
@@ -49,7 +36,7 @@ class Lite {
             $options = array(
                 'username' => $this->confArr['username'],
                 'password' => $this->confArr['password'],
-//                'readPreference' => $this->confArr['read_preference'],
+//                'readPreference' => $this->confArr['read_preference'],  // 此参数已废弃
                 'connectTimeoutMS' => intval($this->confArr['connect_timeout_ms']),
                 'socketTimeoutMS' => intval($this->confArr['socket_timeout_ms']),
                 'persist' => $this->confArr['persist'],
@@ -73,7 +60,7 @@ class Lite {
      * @return array|bool
      * @throws MongoDB\Driver\Exception\Exception
      */
-    public function find($query = array(), $fields = array(), $collection, $sort = array(), $limit = 0, $skip = 0) {
+    public function find($collection, $query = array(), $fields = array(), $sort = array(), $limit = 0, $skip = 0) {
         $conn = $this->connect();
         if (empty($conn)) {
             return false;
@@ -100,8 +87,8 @@ class Lite {
             return $data;
         } catch (Exception $e) {
             //记录错误日志
+            return $e->getMessage();
         }
-        return false;
     }
 
     /**
@@ -137,9 +124,9 @@ class Lite {
      * @param array $whereArr
      * @param array $options
      * @param string $collection
-     * @return bool
+     * @return bool|string
      */
-    public function delete($whereArr, $options = array(), $collection) {
+    public function delete($collection, $whereArr, $options = array()) {
         if (empty($whereArr)) {
             return false;
         }
@@ -156,12 +143,11 @@ class Lite {
             $bulk = new MongoDB\Driver\BulkWrite();
             $bulk->delete($whereArr, $options);
             $writeConcern = new MongoDB\Driver\WriteConcern(MongoDB\Driver\WriteConcern::MAJORITY, 30000);
-            $result = $conn->executeBulkWrite($collection, $bulk, $writeConcern);
+            $conn->executeBulkWrite($collection, $bulk, $writeConcern);
             return true;
         } catch (Exception $e) {
-            //记录错误日志
+            return "delete失败：" . $e->getMessage();
         }
-        return false;
     }
 
     /**
@@ -211,20 +197,21 @@ class Lite {
 
     /**
      * @desc  7.聚合distinct
+     * @param $collection
+     * @param $dbName
      * @param $key
      * @param $where
-     * @param $collection
      * @return bool
      * @throws MongoDB\Driver\Exception\Exception
      */
-    public function distinct($key, $where, $collection) {
+    public function distinct($collection, $dbName, $key, $where) {
         try {
             $cmd = array(
                 'distinct' => $collection,
                 'key' => $key,
                 'query' => $where,
             );
-            $res = $this->command($cmd);
+            $res = $this->command($cmd, $dbName);
             $result = $res->toArray();
             return $result[0]->values;
         } catch (Exception $e) {
