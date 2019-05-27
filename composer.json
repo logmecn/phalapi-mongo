@@ -1,5 +1,5 @@
 {
-  "name": "logmecn/mongo",
+  "name": "phalapi/mongo",
   "description": "PhalApi 2.x 扩展类库 - 使用 MongoDB 的扩展",
   "keywords": [
     "phalapi",
