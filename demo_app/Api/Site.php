@@ -99,7 +99,7 @@ class Site extends Api {
     }
 
     /**
-     * @desc 查询单个用户信息
+     * @desc 查询单个用户信息，find的用法
      * @return mixed
      */
     public function queryUser(){

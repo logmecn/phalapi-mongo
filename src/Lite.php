@@ -152,19 +152,19 @@ class Lite {
 
     /**
      * @desc 执行command操作:
+     * @param $collection
      * @param array $params
-     * @param string $dbName
      * @return bool|MongoDB\Driver\Cursor
      * @throws MongoDB\Driver\Exception\Exception
      */
-    private function command($params, $dbName) {
+    private function command($collection, $params) {
         $conn = $this->connect();
         if (empty($conn)) {
             return false;
         }
         try {
             $cmd = new MongoDB\Driver\Command($params);
-            $result = $conn->executeCommand($dbName, $cmd);
+            $result = $conn->executeCommand($collection, $cmd);
             return $result;
         } catch (Exception $e) {
             //记录错误
@@ -173,20 +173,15 @@ class Lite {
     }
 
     /**
-     * @desc // 6.统计count:
-     * @param array $query
+     * @desc // 6.统计count 获取统计数
      * @param string $collection
-     * @param $dbName
+     * @param array $query
      * @return bool
      * @throws MongoDB\Driver\Exception\Exception
      */
-    public function count($query, $collection, $dbName) {
+    public function count($collection, $query) {
         try {
-            $cmd = array(
-                'count' => $collection,
-                'query' => $query,
-            );
-            $res = $this->command($cmd, $dbName);
+            $res = $this->command($collection, $query);
             $result = $res->toArray();
             return $result[0]->n;
         } catch (Exception $e) {
@@ -198,20 +193,19 @@ class Lite {
     /**
      * @desc  7.聚合distinct
      * @param $collection
-     * @param $dbName
      * @param $key
      * @param $where
      * @return bool
      * @throws MongoDB\Driver\Exception\Exception
      */
-    public function distinct($collection, $dbName, $key, $where) {
+    public function distinct($collection, $key, $where) {
         try {
             $cmd = array(
                 'distinct' => $collection,
                 'key' => $key,
                 'query' => $where,
             );
-            $res = $this->command($cmd, $dbName);
+            $res = $this->command($collection, $cmd);
             $result = $res->toArray();
             return $result[0]->values;
         } catch (Exception $e) {
@@ -225,11 +219,10 @@ class Lite {
      * @param $where
      * @param $group
      * @param $collection
-     * @param $dbName
      * @return bool
      * @throws MongoDB\Driver\Exception\Exception
      */
-    public function aggregate($where, $group, $collection, $dbName) {
+    public function aggregate($where, $group, $collection) {
         try {
             $cmd = array(
                 'aggregate' => $collection,
@@ -243,7 +236,7 @@ class Lite {
                 ),
                 'explain' => false,
             );
-            $res = $this->command($cmd, $dbName);
+            $res = $this->command($collection, $cmd);
             if (!$res) {
                 return false;
             }
