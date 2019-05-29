@@ -6,7 +6,6 @@
 
 ### 注意：
 由于MongoDB在 PHP5.6之前的驱动与 PHP7.0 以后的驱动完全不一致，所以此项目建议使用 PHP7.1以上，建议使用当前较新的 PHP7.2或7.3版本。
-否则可能会出错。
 
 本代码为复制网上的一些方法，加以改造。网上的同一个内容太多，原出处无从查考。
 
@@ -27,7 +26,7 @@
             'persist' => 'x',       // 连接保持（MongoDB3.*新增）
         ),
     
-        'namespace' => 'wxwork',    // 命名空间
+        'ns' => 'wxwork',    // 命名空间
     
     );
     ```
@@ -40,7 +39,7 @@
 3. 在 composer.json 中的 require 中加入一行：
     （说明：暂时未支持，后续争取支持使用 phalapi/mongo）
     ```
-    "logmecn/mongo": "dev-master"
+    "phalapi/mongo": "dev-master"
     ```
 4. 执行命令：
     ```shell

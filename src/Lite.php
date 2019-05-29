@@ -154,7 +154,7 @@ class Lite {
      * @desc 执行command操作:
      * @param $collection
      * @param array $params
-     * @return bool|MongoDB\Driver\Cursor
+     * @return string|MongoDB\Driver\Cursor
      * @throws MongoDB\Driver\Exception\Exception
      */
     private function command($collection, $params) {
@@ -167,9 +167,8 @@ class Lite {
             $result = $conn->executeCommand($collection, $cmd);
             return $result;
         } catch (Exception $e) {
-            //记录错误
+            return $e->getMessage();
         }
-        return false;
     }
 
     /**
