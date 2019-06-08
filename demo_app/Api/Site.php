@@ -13,6 +13,19 @@ use function PhalApi\DI;
  */
 class Site extends Api {
 
+    private $mong;
+    private $coll;
+    private $mdb;
+    private $mdbcoll;
+
+    public function __construct()
+    {
+        $this->mong = DI()->mongo;
+        $this->mdb = DI()->config->get("mongo.mongo.db_name");  // MongoDB数据库
+        $this->coll = DI()->config->get("mongo.wkuser");    // MongoDB 要操作的集合，即类似于MySQL的表
+        $this->mdbcoll = $this->mdb.".".$this->coll;
+    }
+
     public function getRules() {
         return array(
             'index' => array(
@@ -21,12 +34,16 @@ class Site extends Api {
             'queryUser' => array(
                 'userId' => array('name' => 'userId', 'desc'=> '用户的userid'),
             ),
+            'createUser' => array(),
+            'syncDept' => array(),
+            'syncUser' => array(),
             'syncUserByDept' => array(
                 'dept' => array('name' => 'dept', 'type' => 'int', 'default' => 1, 'min' => 1, 'desc' => '同步该部门id下的所有人员详情'),
             ),
-            'delUser' => array(
-                'userId' => array('name' => 'userId', 'desc'=> '用户的userid'),
-            ),
+            'delUser' => array('userid' => array('name' => 'userid', 'desc'=> '用户的userid'),),
+            'aggregateUser' => array(),
+            'countUser' => [],
+
         );
     }
 
@@ -52,16 +69,15 @@ class Site extends Api {
      * @return string
      */
     public function syncUserByDept(){
-        $mong = DI()->mongo;
-//        $arr_user = $this->object2array($user);
         $user = array (
-            'userid' => 'bob',
-            'name' => 'Bob',
+            'userid' => 'bob2',
+            'name' => 'Bob2',
             'english_name' => '',
             'mobile' => '',
             'department' =>
                 array (
                     0 => 15,
+                    1 => 16,
                 ),
             'order' =>
                 array (
@@ -81,12 +97,13 @@ class Site extends Api {
             'status' => 4,
         );
         $es = "";
+
         try{
-            $ns = DI()->config->get('mongo.namespace');
-            $msg = $mong->insert($user, $ns.".wkuser") != true;
+            $msg = $this->mong->insert($this->mdbcoll, $user);
             if ( $msg){
                 $es = $msg;
             }
+            DI()->logger->info("插入Mongo成功：$es",  $msg);
         } catch (Exception $e){
             DI()->logger->error("同步部门时，插入或更新用户失败：", json_encode($user) . $e->getMessage() );
             $es = $e->getMessage();
@@ -94,10 +111,9 @@ class Site extends Api {
         if ($es != ""){
             return "同步部门：$this->dept 时发生错误，请查看日志以分析原因。部分原因为：". $es ;
         }else {
-            return "同步所属部门中的用户完全，部门id为：" . $this->dept;
+            return "同步所属部门中的用户完成，部门id为：" . $this->dept;
         }
     }
-
     /**
      * @desc 查询单个用户信息，find的用法
      * @return mixed
@@ -105,7 +121,8 @@ class Site extends Api {
     public function queryUser(){
         // http://127.0.0.1/index.php?s=Site.queryUser&userid=bob
         $query = array('userid'=>$this->userid);
-        $res = $this->mong->find($this->ns, $query, $field=array());
+        $res = $this->mong->find($this->mdbcoll, $query, $field=array());
+
         return $res;
     }
 
@@ -115,15 +132,78 @@ class Site extends Api {
      */
     public function delUser(){
         $query = array('userid' => $this->userid);
-        $res = $this->mong->delete($this->ns, $query);
+        $res = $this->mong->delete($this->mdbcoll, $query);
         return $res;
+    }
+
+
+    /**
+     * @desc 查询文档中指定字段的总数
+     * @return string
+     */
+    public function countUser(){
+        $query = array('userid' => 'bob');
+        $res = $this->mong->count($this->mdb, $this->coll, $query);
+        if ($res['ret'] == 200) {
+            DI()->response->setMsg("ok");
+            return $res['msg'];
+        }else {
+            DI()->response->setRet($res['ret']);
+            DI()->response->setMsg($res['msg']);
+            return "failed";
+        }
+    }
+
+    /**
+     * @desc 聚合去除重复的数据，示例：db.getCollection('wkuser').distinct('department')
+     * @return string
+     */
+    public function distinctUser(){
+        $dbName = $this->mdb;
+        $collection = $this->coll;
+        $where = [];
+        $key = 'department';
+        $res = $this->mong->distinct($dbName, $collection, $key, $where);
+        if ($res['ret'] == 200 ) {
+            DI()->response->setMsg("ok");
+            return $res['msg'];
+        }else {
+            DI()->response->setRet($res['ret']);
+            DI()->response->setMsg($res['msg']);
+            return "failed";
+        }
+    }
+
+
+    /**
+     * @desc 聚合查询。
+     * 示例：db.wkuser.aggregate([{$group: { _id:"$name", count:{$sum:1}}}])
+     * @return string
+     */
+    public function aggregateUser(){
+        $dbName = $this->mdb;
+        $collection = $this->coll;
+        $where = array();
+        $group = array(
+            "_id" => '$name',
+            "count" => ['$sum'=>1,],
+        );
+        $res = $this->mong->aggregate($dbName, $collection, $where, $group);
+        if ($res['ret'] == 200 ) {
+            DI()->response->setMsg("ok");
+            return $res['msg'];
+        }else {
+            DI()->response->setRet($res['ret']);
+            DI()->response->setMsg($res['msg']);
+            return "failed";
+        }
     }
 
 
 
     /**
      * @param $object
-     * @return mixed
+     * @return array
      */
     private function object2array(&$object)
     {

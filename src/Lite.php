@@ -200,27 +200,30 @@ class Lite {
     }
 
     /**
-     * @desc  7.聚合distinct
+     * @desc  distinct 聚合数据，对结果重复数据去除，类似于数据库中的 distinct
+     * @param $dbName
      * @param $collection
      * @param $key
      * @param $where
-     * @return bool
+     * @return array
      * @throws MongoDB\Driver\Exception\Exception
      */
-    public function distinct($collection, $key, $where) {
+    public function distinct($dbName, $collection, $key, $where) {
         try {
             $cmd = array(
                 'distinct' => $collection,
                 'key' => $key,
-                'query' => $where,
+                'query' => $this->array2object($where),
             );
-            $res = $this->command($collection, $cmd);
-            $result = $res->toArray();
-            return $result[0]->values;
+            $res = $this->command($dbName, $cmd);
+            if (!$res || is_string($res)) {
+                return array('msg'=>$res, "ret"=>400);
+            }
+            $res = $this->object2array($res);
+            return array("msg" => $res, "ret"=>200);
         } catch (Exception $e) {
-            //记录错误
+            return array('msg'=>$e->getMessage(), "ret"=>400);
         }
-        return false;
     }
 
     /**

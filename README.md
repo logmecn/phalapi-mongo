@@ -24,7 +24,7 @@
             'persist' => 'x',       // 连接保持（MongoDB3.*新增）
         ),
     
-        'ns' => 'wxwork',    // 命名空间
+        'wkuser' => 'wkuser',  // MongoDB 的库中的集合 collection，类似于数据库的一张表
     
     );
     ```
@@ -47,7 +47,13 @@
 5. 可以开始测试了。
 
 ## 使用方法：
-1. 插入：
+各种使用方法示例，请参考 demo_app 目录下的 Site.php 。
+
+其他无示例的操作，可以调用 command 函数进行封装。
+
+如果您有其他命令要封装，请发issue ，我会尽力增加到项目中。
+
+1. 插入示例：
       ```php
       $mong = DI()->mongo;
       // $arr_user = $this->object2array($user);
@@ -93,4 +99,4 @@
       }
       ```
 2. 读取：
-    （后续放在Demo中，不放在帮助里）
+    （其他操作，请参考demo）
