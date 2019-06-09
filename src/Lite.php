@@ -15,7 +15,8 @@ use stdClass;
 /**
  *
  */
-class Lite {
+class Lite
+{
     private $confArr = array();
 
     /**
@@ -31,8 +32,9 @@ class Lite {
      * @desc 连接到 MongoDB
      * @return bool|Manager
      */
-    private function connect() {
-        try{
+    private function connect()
+    {
+        try {
             $connStr = "mongodb://" . $this->confArr['host'] . ":" . $this->confArr['port'] . "/" . $this->confArr['db_name'];
             $options = array(
                 'username' => $this->confArr['username'],
@@ -44,8 +46,7 @@ class Lite {
             );
             $mc = new Manager($connStr, $options);
             return $mc;
-        }
-        catch(Exception $e){
+        } catch (Exception $e) {
             return false;
         }
     }
@@ -61,7 +62,8 @@ class Lite {
      * @return array|bool
      * @throws MongoDB\Driver\Exception\Exception
      */
-    public function find($collection, $query = array(), $fields = array(), $sort = array(), $limit = 0, $skip = 0) {
+    public function find($collection, $query = array(), $fields = array(), $sort = array(), $limit = 0, $skip = 0)
+    {
         $conn = $this->connect();
         if (empty($conn)) {
             return false;
@@ -82,7 +84,7 @@ class Lite {
             $mongoQuery = new MongoDB\Driver\Query($query, $options);
             $readPreference = new MongoDB\Driver\ReadPreference(MongoDB\Driver\ReadPreference::RP_SECONDARY);
             $cursor = $conn->executeQuery($collection, $mongoQuery, $readPreference);
-            foreach($cursor as $value) {
+            foreach ($cursor as $value) {
                 $data[] = (array)$value;
             }
             return $data;
@@ -94,11 +96,12 @@ class Lite {
 
     /**
      * @desc 插入操作insert:
-     * @param  array $addArr  要增加的数据
-     * @param  string $collection
+     * @param array $addArr 要增加的数据
+     * @param string $collection
      * @return bool|string
      */
-    public function insert($collection, $addArr) {
+    public function insert($collection, $addArr)
+    {
         if (empty($addArr) || !is_array($addArr)) {
             return false;
         }
@@ -127,7 +130,8 @@ class Lite {
      * @param string $collection
      * @return bool|string
      */
-    public function delete($collection, $whereArr, $options = array()) {
+    public function delete($collection, $whereArr, $options = array())
+    {
         if (empty($whereArr)) {
             return false;
         }
@@ -151,6 +155,32 @@ class Lite {
         }
     }
 
+    private function array2object($array)
+    {
+        if (is_array($array)) {
+            $obj = new StdClass();
+            foreach ($array as $key => $val) {
+                $obj->$key = $val;
+            }
+        } else {
+            $obj = $array;
+        }
+        return $obj;
+    }
+
+    private function object2array($object)
+    {
+        $array = [];
+        if (is_object($object)) {
+            foreach ($object as $key => $value) {
+                $array[$key] = $value;
+            }
+        } else {
+            $array = $object;
+        }
+        return $array;
+    }
+
     /**
      * @desc 执行command操作:
      * @param $dbName
@@ -158,7 +188,8 @@ class Lite {
      * @return string|MongoDB\Driver\Cursor
      * @throws MongoDB\Driver\Exception\Exception
      */
-    private function command($dbName, $params) {
+    private function command($dbName, $params)
+    {
         $conn = $this->connect();
         if (empty($conn)) {
             return false;
@@ -180,7 +211,8 @@ class Lite {
      * @return array
      * @throws MongoDB\Driver\Exception\Exception
      */
-    public function count($dbName, $collection, array $query) {
+    public function count($dbName, $collection, array $query)
+    {
         $cmd = array(
             'count' => $collection,
             'query' => $query,
@@ -190,12 +222,12 @@ class Lite {
             $result = $res->toArray();
 //            var_dump($result);exit;
             if (!empty($result)) {
-                return array("msg"=>$result[0]->n, "ret"=>200);
-            }else{
-                return array("msg"=>"result is empty", "ret"=>200);
+                return array("msg" => $result[0]->n, "ret" => 200);
+            } else {
+                return array("msg" => "result is empty", "ret" => 200);
             }
         } catch (Exception $e) {
-            return array("msg"=>$e->getMessage(), "ret"=>200);
+            return array("msg" => $e->getMessage(), "ret" => 200);
         }
     }
 
@@ -208,7 +240,8 @@ class Lite {
      * @return array
      * @throws MongoDB\Driver\Exception\Exception
      */
-    public function distinct($dbName, $collection, $key, $where) {
+    public function distinct($dbName, $collection, $key, $where)
+    {
         try {
             $cmd = array(
                 'distinct' => $collection,
@@ -217,12 +250,12 @@ class Lite {
             );
             $res = $this->command($dbName, $cmd);
             if (!$res || is_string($res)) {
-                return array('msg'=>$res, "ret"=>400);
+                return array('msg' => $res, "ret" => 400);
             }
             $res = $this->object2array($res);
-            return array("msg" => $res, "ret"=>200);
+            return array("msg" => $res, "ret" => 200);
         } catch (Exception $e) {
-            return array('msg'=>$e->getMessage(), "ret"=>400);
+            return array('msg' => $e->getMessage(), "ret" => 400);
         }
     }
 
@@ -241,7 +274,8 @@ class Lite {
      * @return array ret 返回代码
      * @throws MongoDB\Driver\Exception\Exception
      */
-    public function aggregate($dbName, $coll, $where, $group, $limit=10) {
+    public function aggregate($dbName, $coll, $where, $group, $limit = 10)
+    {
         try {
             $cmd = array(
                 'aggregate' => $coll,
@@ -261,37 +295,41 @@ class Lite {
             );
             $res = $this->command($dbName, $cmd);
             if (!$res || is_string($res)) {
-                return array('msg'=>$res, "ret"=>400);
+                return array('msg' => $res, "ret" => 400);
             }
             $res = $this->object2array($res);
-            return array("msg" => $res, "ret"=>200);
+            return array("msg" => $res, "ret" => 200);
         } catch (Exception $e) {
-            return array('msg'=>$e->getMessage(), "ret"=>400);
+            return array('msg' => $e->getMessage(), "ret" => 400);
         }
 
     }
 
-    private function array2object($array) {
-        if (is_array($array)) {
-            $obj = new StdClass();
-            foreach ($array as $key => $val){
-                $obj->$key = $val;
+    /**
+     * @desc 单文档的原子查找并修改操作。
+     * @param $dbName
+     * @param $coll
+     * @param $query
+     * @param $update
+     * @return array
+     * @throws MongoDB\Driver\Exception\Exception
+     */
+    public function findAndModify($dbName, $coll, $query, $update)
+    {
+        try {
+            $cmd = [
+                'findAndModify' => $coll,
+                'query' => $query,
+                'update' => $update,
+            ];
+            $res = $this->command($dbName, $cmd);
+            if (!$res || is_string($res)) {
+                return array('msg' => $res, "ret" => 400);
             }
+            $res = $this->object2array($res);
+            return array("msg" => $res, "ret" => 200);
+        } catch (Exception $e) {
+            return array('msg' => $e->getMessage(), "ret" => 400);
         }
-        else { $obj = $array; }
-        return $obj;
-    }
-
-    private function object2array($object) {
-        $array = [];
-        if (is_object($object)) {
-            foreach ($object as $key => $value) {
-                $array[$key] = $value;
-            }
-        }
-        else {
-            $array = $object;
-        }
-        return $array;
     }
 }

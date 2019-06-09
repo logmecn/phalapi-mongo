@@ -43,7 +43,7 @@ class Site extends Api {
             'delUser' => array('userid' => array('name' => 'userid', 'desc'=> '用户的userid'),),
             'aggregateUser' => array(),
             'countUser' => [],
-
+            'findAndMUser' => [],
         );
     }
 
@@ -198,6 +198,37 @@ class Site extends Api {
             return "failed";
         }
     }
+
+    /**
+     * @desc 查找并修改发生的数据，本命令是单个文档提供了原子操作，因此效率高。此命令不支持多文档原子事务
+     * db.getCollection('wkuser').findAndModify(
+     *      {query:{userid:"bob"},update:{$inc:{status:+1}}
+     *      $push:{order:1}}
+     * })
+     * 注意：返回的值是查询的值，而不是修改之后的值。
+     * 即修改了数据，但返回的是修改之前的数据。
+     *
+     * @return string
+     */
+    public function findAndMUser(){
+        $dbName = $this->mdb;
+        $collection = $this->coll;
+        $query = ['userid'=>'bob'];
+        $update = array(
+            '$inc' => ['status'=> +1,],
+//            '$push' => ['order'=>1] // push的字段如果不是数组则会报错
+        );
+        $res = $this->mong->findAndModify($dbName, $collection, $query, $update);
+        if ($res['ret'] == 200 ) {
+            DI()->response->setMsg("ok");
+            return $res['msg'];
+        }else {
+            DI()->response->setRet($res['ret']);
+            DI()->response->setMsg($res['msg']);
+            return "failed";
+        }
+    }
+
 
 
 
