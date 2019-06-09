@@ -10,6 +10,7 @@ namespace PhalApi\Mongo;
 use Exception;
 use MongoDB;
 use MongoDB\Driver\Manager;
+use function PhalApi\DI;
 use stdClass;
 
 /**
@@ -123,8 +124,39 @@ class Lite
         return false;
     }
 
+
     /**
-     * @desc 删除delete：
+     * @desc 更新文档，同时也可以用于插入文档（用于 insertOrUpdate 操作，options选项用作调整参数）
+     * @referece 参考：https://www.php.net/manual/zh/mongodb-driver-bulkwrite.update.php
+     * @param $mdbcoll string 数据库名.集合名
+     * @param $query    array 要查询的文档关键字
+     * @param $set      array 要更新的文档内容
+     * @param $optins   array 更新选项
+     * @return bool     返回操作是否成功
+     */
+    public function update($mdbcoll, $query, $set, $optins) {
+        $conn = $this->connect();
+        if (empty($conn)) {
+            return false;
+        }
+        try {
+            $bulk = new MongoDb\Driver\BulkWrite();
+            $bulk->update(  // 例子： {'url':1},{'$set':data}, ['multi' => false, 'upsert' => true]
+                $query,
+                ['$set'=>$set],
+                $optins     // 其中选项upset为true 时，为除query以外的数据会被 覆盖
+            );
+            $conn->executeBulkWrite($mdbcoll, $bulk); //此方法无返回值
+            return true;
+        } catch (Exception $e) {
+            DI()->logger->error("update失败：". $e->getMessage());
+            return false;
+        }
+    }
+
+
+    /**
+     * @desc 删除delete文档：
      * @param array $whereArr
      * @param array $options
      * @param string $collection
@@ -204,7 +236,7 @@ class Lite
     }
 
     /**
-     * @desc // 6.统计count 获取统计数
+     * @desc // 统计count 获取统计数
      * @param $dbName
      * @param string $collection
      * @param array $query
@@ -220,7 +252,6 @@ class Lite
         try {
             $res = $this->command($dbName, $cmd);
             $result = $res->toArray();
-//            var_dump($result);exit;
             if (!empty($result)) {
                 return array("msg" => $result[0]->n, "ret" => 200);
             } else {
@@ -261,11 +292,10 @@ class Lite
 
     /**
      * @desc aggregate操作：聚合(aggregate)主要用于处理数据(诸如统计平均值,求和等)，并返回计算后的数据结果。
-     * 有点类似sql语句中的 count(*).
-     * 聚合操作处理数据记录并返回计算结果。
-     * 聚合操作将多个文档中的值组合在一起，并可对分组数据执行各种操作，以返回单个结果。
-     * 在SQL中的 count(*)与group by组合相当于mongodb 中的聚合功能。
-     * 示例命令：db.wkuser.aggregate([{$group: { _id:"$name", count:{$sum:1}}}])
+     *          有点类似sql语句中的 count(*).
+     *          聚合操作将多个文档中的值组合在一起，并可对分组数据执行各种操作，以返回单个结果。
+     *          在SQL中的 count(*)与group by组合相当于mongodb 中的聚合功能。
+     *          示例命令：db.wkuser.aggregate([{$group: { _id:"$name", count:{$sum:1}}}])
      * @param $dbName
      * @param $coll
      * @param $where
@@ -306,7 +336,7 @@ class Lite
     }
 
     /**
-     * @desc 单文档的原子查找并修改操作。
+     * @desc 单文档的原子查找并修改操作。注意与 update 方法的不同使用方法
      * @param $dbName
      * @param $coll
      * @param $query
