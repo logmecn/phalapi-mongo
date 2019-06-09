@@ -114,6 +114,59 @@ class Site extends Api {
             return "同步所属部门中的用户完成，部门id为：" . $this->dept;
         }
     }
+
+    /**
+     * @desc 使用 insertOrUpdate 方法，当 mongodb中的关键字段中判断无该文档时，则插入；
+     *          否则更新该文档中 除查询的关键字段外其他的字段。
+     * @return string
+     */
+    public function InsertOrUpdateUser(){
+        $user = array (
+            'userid' => 'bob3',
+            'name' => 'Bob3',
+            'english_name' => 'e_bob3',
+            'mobile' => '',
+            'department' =>
+                array (
+                    0 => 15,
+                    1 => 16,
+                ),
+            'order' =>
+                array (
+                    0 => 0,
+                ),
+            'position' => '',
+            'gender' => '0',
+            'email' => '',
+            'telephone' => '',
+            'isleader' => 0,
+            'avatar_mediaid' => NULL,
+            'enable' => 1,
+            'extattr' =>
+                array (
+                    'attrs' => NULL,
+                ),
+            'status' => 4,
+        );
+        $failed_count = 0;  // 插入失败次数
+        try{
+            $query = ['userid'=>$user['userid']];
+            $options =  ['multi' => false, 'upsert' => true];
+            $msg = $this->mong->update($this->mdbcoll, $query, $user, $options); //无该userid时插入，有时更新
+            if( $msg == false ){
+                $failed_count = $failed_count + 1;
+            }
+        } catch (Exception $e){
+            DI()->logger->error("同步部门时，插入或更新用户失败：", json_encode($user) . $e->getMessage() );
+        }
+        if ($failed_count != 0){
+            DI()->response->setMsg("同步部门：$this->dept 时发生错误，请查看日志以分析原因，产生错误次数：$failed_count");
+            return "failed!";
+        }else {
+            return "同步所属部门中的用户完成，部门id为：" . $this->dept;
+        }
+    }
+
     /**
      * @desc 查询单个用户信息，find的用法
      * @return mixed
