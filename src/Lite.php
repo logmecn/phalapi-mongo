@@ -95,7 +95,7 @@ class Lite {
      * @desc 插入操作insert:
      * @param  array $addArr  要增加的数据
      * @param  string $collection
-     * @return bool|string
+     * @return bool|string|array
      */
     public function insert($addArr, $collection) {
         if (empty($addArr) || !is_array($addArr)) {
@@ -107,11 +107,11 @@ class Lite {
         }
         try {
             $bulk = new MongoDB\Driver\BulkWrite();
-            $bulk->insert($addArr);
+            $objectId=$bulk->insert($addArr);
             $writeConcern = new MongoDB\Driver\WriteConcern(MongoDB\Driver\WriteConcern::MAJORITY, 6000);
             $result = $conn->executeBulkWrite($collection, $bulk, $writeConcern);
             if ($result->getInsertedCount()) {
-                return true;
+                return (array)($objectId);
             }
         } catch (Exception $e) {
             return "insert失败：" . $e->getMessage();
