@@ -44,6 +44,7 @@ class Lite
                 'connectTimeoutMS' => intval($this->confArr['connect_timeout_ms']),
                 'socketTimeoutMS' => intval($this->confArr['socket_timeout_ms']),
                 'persist' => $this->confArr['persist'],
+                'authSource' => $this->confArr['admin'],
             );
             $mc = new Manager($connStr, $options);
             return $mc;
@@ -119,6 +120,7 @@ class Lite
                 return (array)($objectId);
             }
         } catch (Exception $e) {
+            DI()->response->setMsg($e->getMessage ()); // 需要在返回中msg中展示错误提示时，使用这句。
             return "insert失败：" . $e->getMessage();
         }
         return false;

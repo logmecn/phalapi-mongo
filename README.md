@@ -6,7 +6,8 @@
 
 ### 注意：
 由于MongoDB在 PHP5.6之前的驱动与 PHP7.0 以后的驱动完全不一致，所以此项目建议使用 PHP7.1以上，建议使用当前较新的 PHP7.2或7.3版本。
-
+php的windows驱动下载地址：https://windows.php.net/downloads/pecl/releases/mongodb/，下载到 ext 目录，并加到php.ini文件中。
+其他系统的可以使用 yum/apt等工具下载安装
 ## 安装及配置方法：
 1. 在 config 目录下，新建一个文件：config/mongo.php，内容如下
     ```
@@ -41,10 +42,11 @@
     ```
 4. 执行命令：
     ```shell
-     php composer.phar update --no-interaction --ansi
+    php composer.phar update --no-interaction --ansi
 
     ```
 5. 可以开始测试了。
+6. 问题：在使用较低版本的 mongodb 驱动连接较低MongoDB服务器时，会提示：Authentication failed。这时使用较新的驱动即可解决。
 
 ## 使用方法：
 各种使用方法示例，请参考 demo_app 目录下的 Site.php 。
